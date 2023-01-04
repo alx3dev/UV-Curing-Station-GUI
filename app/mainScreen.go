@@ -162,7 +162,7 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	uvs_opts := container.NewVBox(timerOpts, powerOpts, speedOpts)
 	bottom_buttons := container.NewVBox(controlButtons)
 
-	content := container.NewBorder(nil, bottom_buttons, nil, nil, uvs_opts)
+	screen := container.NewBorder(nil, bottom_buttons, nil, nil, uvs_opts)
 
 	w.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
 		switch key.Name {
@@ -193,7 +193,7 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 		case fyne.KeyEscape:
 		}
 	})
-	content.Refresh()
+	screen.Refresh()
 
-	return content
+	return screen
 }
