@@ -63,10 +63,10 @@ func (uv *UV_Station) Start() {
 	uv.APP.Run()
 }
 
-func Initialize() *UV_Station {
-	a := app.NewWithID("curing.station.uv")
+func Initialize(id string) *UV_Station {
+	a := app.NewWithID(id)
 
-	thm := fyne.CurrentApp().Preferences().StringWithFallback("THEME", "Light")
+	thm := a.Preferences().StringWithFallback("THEME", "Light")
 
 	a.Settings().SetTheme(&theme2.MyTheme{Theme: thm})
 

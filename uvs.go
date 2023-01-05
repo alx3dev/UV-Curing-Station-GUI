@@ -5,10 +5,9 @@ import (
 )
 
 func main() {
-	uvsApp := uvs.Initialize()
+	uvsApp := uvs.Initialize("curing.station.uv")
 
 	uvsApp.CheckOnStartNotification()
 
 	uvsApp.Start()
 }
-

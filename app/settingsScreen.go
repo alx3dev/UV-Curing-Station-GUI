@@ -60,10 +60,10 @@ func (uv *UV_Station) parseLanguage() func(string) {
 	return func(l string) {
 		switch l {
 		case T.EN:
-			fyne.CurrentApp().Preferences().SetString("LANGUAGE", "English")
+			uv.config.SetString("LANGUAGE", "English")
 			uv.Notify("Please restart app for changes to take effect")
 		case T.SR:
-			fyne.CurrentApp().Preferences().SetString("LANGUAGE", "Serbian")
+			uv.config.SetString("LANGUAGE", "Serbian")
 			uv.Notify("Рестартујте апликацију након промене језика")
 		}
 	}

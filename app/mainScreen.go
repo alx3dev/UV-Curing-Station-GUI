@@ -61,31 +61,31 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	buttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() { uv.decreaseValue(timerSlide, uv.timerBind) }),
+			func() { uv.decreaseValue(timerSlide, timerBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() { uv.increaseValue(timerSlide, uv.timerBind) }))
+			func() { uv.increaseValue(timerSlide, timerBind) }))
 
 	// led power buttons (- +)
 	pbuttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() { uv.decreaseValue(powerSlide, uv.powerBind) }),
+			func() { uv.decreaseValue(powerSlide, powerBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() { uv.increaseValue(powerSlide, uv.powerBind) }))
+			func() { uv.increaseValue(powerSlide, powerBind) }))
 
 	// motor speed buttons (- +)
 	sbuttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() { uv.decreaseValue(speedSlide, uv.speedBind) }),
+			func() { uv.decreaseValue(speedSlide, speedBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() { uv.increaseValue(speedSlide, uv.speedBind) }))
+			func() { uv.increaseValue(speedSlide, speedBind) }))
 
 	timerOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), timerText, timerSlide), buttons)
 	powerOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), powerText, powerSlide), pbuttons)
@@ -152,6 +152,12 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 		case fyne.KeyDown:
 			uv.decreaseValue(powerSlide, uv.powerBind)
 
+		case fyne.KeyPageDown:
+			uv.decreaseValue(speedSlide, uv.speedBind)
+
+		case fyne.KeyPageUp:
+			uv.increaseValue(speedSlide, uv.speedBind)
+
 		case fyne.KeySpace:
 			uv.loadDefaults()
 
@@ -167,18 +173,25 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	return screen
 }
 
+/*
+Helper methods for main screen
+*/
+
+// allow user to change default values
 func (uv *UV_Station) loadDefaults() {
 	uv.timerBind.Set(float64(uv.config.IntWithFallback("TIMER_DEFAULT", TIMER)))
 	uv.powerBind.Set(float64(uv.config.IntWithFallback("POWER_DEFAULT", POWER)))
 	uv.speedBind.Set(float64(uv.config.IntWithFallback("SPEED_DEFAULT", SPEED)))
 }
 
+// increase slider bind value by 1
 func (uv *UV_Station) increaseValue(slide *widget.Slider, bind binding.Float) {
 	if slide.Value < slide.Max {
 		bind.Set(slide.Value + 1)
 	}
 }
 
+// decrease slider bind value by 1
 func (uv *UV_Station) decreaseValue(slide *widget.Slider, bind binding.Float) {
 	if slide.Value > slide.Min {
 		bind.Set(slide.Value - 1)
