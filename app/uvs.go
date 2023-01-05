@@ -20,9 +20,10 @@ var POWER_MAX int = 100
 var SPEED_MAX int = 100
 
 type UV_Station struct {
-	WIN fyne.Window
-	APP fyne.App
-	T   uvs.Translation
+	WIN    fyne.Window
+	APP    fyne.App
+	T      uvs.Translation
+	config fyne.Preferences
 
 	timerBind binding.Float
 	powerBind binding.Float
@@ -69,15 +70,14 @@ func Initialize() *UV_Station {
 
 	a.Settings().SetTheme(&theme2.MyTheme{Theme: thm})
 
-	win := a.NewWindow("")
-
 	uv := &UV_Station{
-		WIN: win,
-		APP: a,
+		WIN:    a.NewWindow(""),
+		APP:    a,
+		config: a.Preferences(),
 	}
 
 	uv.LoadTranslations()
-	win.SetTitle(uv.T.Title)
+	uv.WIN.SetTitle(uv.T.Title)
 
 	return uv
 }

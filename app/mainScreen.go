@@ -18,12 +18,10 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	w := uv.WIN
 	T := uv.T
 
-	config := a.Preferences()
-
 	// load defaults
-	timer := config.IntWithFallback("TIMER", TIMER)
-	power := config.IntWithFallback("POWER", POWER)
-	speed := config.IntWithFallback("SPEED", SPEED)
+	timer := uv.config.IntWithFallback("TIMER", TIMER)
+	power := uv.config.IntWithFallback("POWER", POWER)
+	speed := uv.config.IntWithFallback("SPEED", SPEED)
 
 	/*
 		define binding and slide for each parameter
@@ -63,55 +61,31 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	buttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() {
-				if timerSlide.Value > timerSlide.Min {
-					timerBind.Set(timerSlide.Value - 1)
-				}
-			}),
+			func() { uv.decreaseValue(timerSlide, uv.timerBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() {
-				if timerSlide.Value < timerSlide.Max {
-					timerBind.Set(timerSlide.Value + 1)
-				}
-			}))
+			func() { uv.increaseValue(timerSlide, uv.timerBind) }))
 
 	// led power buttons (- +)
 	pbuttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() {
-				if powerSlide.Value > powerSlide.Min {
-					powerBind.Set(powerSlide.Value - 1)
-				}
-			}),
+			func() { uv.decreaseValue(powerSlide, uv.powerBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() {
-				if powerSlide.Value < powerSlide.Max {
-					powerBind.Set(powerSlide.Value + 1)
-				}
-			}))
+			func() { uv.increaseValue(powerSlide, uv.powerBind) }))
 
 	// motor speed buttons (- +)
 	sbuttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() {
-				if speedSlide.Value > speedSlide.Min {
-					speedBind.Set(speedSlide.Value - 2)
-				}
-			}),
+			func() { uv.decreaseValue(speedSlide, uv.speedBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() {
-				if speedSlide.Value < speedSlide.Max {
-					speedBind.Set(speedSlide.Value + 2)
-				}
-			}))
+			func() { uv.increaseValue(speedSlide, uv.speedBind) }))
 
 	timerOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), timerText, timerSlide), buttons)
 	powerOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), powerText, powerSlide), pbuttons)
@@ -119,17 +93,17 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
 	timerSlide.OnChanged = func(f float64) {
 		timerBind.Set(f)
-		config.SetInt("TIMER", int(f))
+		uv.config.SetInt("TIMER", int(f))
 	}
 
 	powerSlide.OnChanged = func(f float64) {
 		powerBind.Set(f)
-		config.SetInt("POWER", int(f))
+		uv.config.SetInt("POWER", int(f))
 	}
 
 	speedSlide.OnChanged = func(f float64) {
 		speedBind.Set(f)
-		config.SetInt("SPEED", int(f))
+		uv.config.SetInt("SPEED", int(f))
 	}
 
 	uv.timerBind = timerBind
@@ -167,27 +141,25 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 		switch key.Name {
 
 		case fyne.KeyRight:
-			if timerSlide.Value < timerSlide.Max {
-				timerBind.Set(timerSlide.Value + 1)
-			}
+			uv.increaseValue(timerSlide, uv.timerBind)
+
 		case fyne.KeyLeft:
-			if timerSlide.Value > timerSlide.Min {
-				timerBind.Set(timerSlide.Value - 1)
-			}
+			uv.decreaseValue(timerSlide, uv.timerBind)
+
 		case fyne.KeyUp:
-			if powerSlide.Value < powerSlide.Max {
-				powerBind.Set(powerSlide.Value + 1)
-			}
+			uv.increaseValue(powerSlide, uv.powerBind)
+
 		case fyne.KeyDown:
-			if powerSlide.Value > powerSlide.Min {
-				powerBind.Set(powerSlide.Value - 1)
-			}
+			uv.decreaseValue(powerSlide, uv.powerBind)
+
 		case fyne.KeySpace:
 			uv.loadDefaults()
 
 		case fyne.KeyReturn:
+			// to-do Send command to ESP32
 
 		case fyne.KeyEscape:
+			// to-do Minimize to taskbar?
 		}
 	})
 	screen.Refresh()
@@ -196,8 +168,19 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 }
 
 func (uv *UV_Station) loadDefaults() {
-	config := uv.APP.Preferences()
-	uv.timerBind.Set(float64(config.IntWithFallback("TIMER_DEFAULT", TIMER)))
-	uv.powerBind.Set(float64(config.IntWithFallback("POWER_DEFAULT", POWER)))
-	uv.speedBind.Set(float64(config.IntWithFallback("SPEED_DEFAULT", SPEED)))
+	uv.timerBind.Set(float64(uv.config.IntWithFallback("TIMER_DEFAULT", TIMER)))
+	uv.powerBind.Set(float64(uv.config.IntWithFallback("POWER_DEFAULT", POWER)))
+	uv.speedBind.Set(float64(uv.config.IntWithFallback("SPEED_DEFAULT", SPEED)))
+}
+
+func (uv *UV_Station) increaseValue(slide *widget.Slider, bind binding.Float) {
+	if slide.Value < slide.Max {
+		bind.Set(slide.Value + 1)
+	}
+}
+
+func (uv *UV_Station) decreaseValue(slide *widget.Slider, bind binding.Float) {
+	if slide.Value > slide.Min {
+		bind.Set(slide.Value - 1)
+	}
 }

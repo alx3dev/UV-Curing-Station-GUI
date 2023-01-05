@@ -18,7 +18,7 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	langText := canvas.NewText(T.ChooseLanguage, nil)
 	ldropdown := widget.NewSelect([]string{T.EN, T.SR}, uv.parseLanguage())
 
-	t := fyne.CurrentApp().Preferences().StringWithFallback("THEME", T.Light)
+	t := uv.config.StringWithFallback("THEME", T.Light)
 	switch t {
 	case "Светла", "Light":
 		tdropdown.PlaceHolder = T.Light
@@ -27,7 +27,7 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	}
 	tdropdown.Refresh()
 
-	l := fyne.CurrentApp().Preferences().StringWithFallback("LANGUAGE", "English")
+	l := uv.config.StringWithFallback("LANGUAGE", "English")
 	switch l {
 	case "English":
 		ldropdown.PlaceHolder = T.EN
@@ -42,15 +42,15 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	return settings
 }
 
-func (uvs *UV_Station) parseTheme() func(string) {
+func (uv *UV_Station) parseTheme() func(string) {
 	return func(t string) {
 		switch t {
 		case "Светла", "Light":
-			fyne.CurrentApp().Preferences().SetString("THEME", "Светла")
-			fyne.CurrentApp().Settings().SetTheme(&theme.MyTheme{Theme: "Светла"})
+			uv.config.SetString("THEME", "Светла")
+			uv.APP.Settings().SetTheme(&theme.MyTheme{Theme: "Светла"})
 		case "Тамна", "Dark":
-			fyne.CurrentApp().Preferences().SetString("THEME", "Тамна")
-			fyne.CurrentApp().Settings().SetTheme(&theme.MyTheme{Theme: "Тамна"})
+			uv.config.SetString("THEME", "Тамна")
+			uv.APP.Settings().SetTheme(&theme.MyTheme{Theme: "Тамна"})
 		}
 	}
 }
