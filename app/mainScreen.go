@@ -119,17 +119,17 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
 	timerSlide.OnChanged = func(f float64) {
 		timerBind.Set(f)
-		a.Preferences().SetInt("TIMER", int(f))
+		config.SetInt("TIMER", int(f))
 	}
 
 	powerSlide.OnChanged = func(f float64) {
 		powerBind.Set(f)
-		a.Preferences().SetInt("POWER", int(f))
+		config.SetInt("POWER", int(f))
 	}
 
 	speedSlide.OnChanged = func(f float64) {
 		speedBind.Set(f)
-		a.Preferences().SetInt("SPEED", int(f))
+		config.SetInt("SPEED", int(f))
 	}
 
 	uv.timerBind = timerBind
@@ -142,18 +142,17 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	updateButton.Importance = widget.HighImportance
 
 	defaultsButton := widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
-		timerBind.Set(float64(TIMER))
-		powerBind.Set(float64(POWER))
-		speedBind.Set(float64(SPEED))
+		uv.loadDefaults()
 	})
 
 	quitButton := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
+		//to-do Send command to ESP-32
 		a.Quit()
 	})
 
 	var controlButtons *fyne.Container
 
-	if fyne.CurrentDevice().IsMobile() || fyne.CurrentDevice().IsBrowser() {
+	if uv.APP.Driver().Device().IsMobile() || uv.APP.Driver().Device().IsBrowser() {
 		controlButtons = container.New(layout.NewGridLayout(2), updateButton, defaultsButton)
 	} else {
 		controlButtons = container.New(layout.NewGridLayout(3), updateButton, defaultsButton, quitButton)
@@ -184,9 +183,7 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 				powerBind.Set(powerSlide.Value - 1)
 			}
 		case fyne.KeySpace:
-			timerBind.Set(float64(TIMER))
-			powerBind.Set(float64(POWER))
-			speedBind.Set(float64(SPEED))
+			uv.loadDefaults()
 
 		case fyne.KeyReturn:
 
@@ -196,4 +193,11 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	screen.Refresh()
 
 	return screen
+}
+
+func (uv *UV_Station) loadDefaults() {
+	config := uv.APP.Preferences()
+	uv.timerBind.Set(float64(config.IntWithFallback("TIMER_DEFAULT", TIMER)))
+	uv.powerBind.Set(float64(config.IntWithFallback("POWER_DEFAULT", POWER)))
+	uv.speedBind.Set(float64(config.IntWithFallback("SPEED_DEFAULT", SPEED)))
 }
