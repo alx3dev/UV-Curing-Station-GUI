@@ -4,7 +4,7 @@
 GUI for Wireless control of UV curing station driven by ESP-8266 / ESP-32
 
 ## Goals
- - Dead-simple and blazing-fast GUI for WiFi control of UV curing station for resin 3D prints
+ - Dead-simple and fast GUI for WiFi control of UV curing station for resin 3D prints
  - Work on Linux and Android devices (Windows is nice for a wider user audience, but it is a Fyne "side-effect")  
  - Some sensor readings (temperature, humidity...)  
  - Light and Dark themes that change without restart  
