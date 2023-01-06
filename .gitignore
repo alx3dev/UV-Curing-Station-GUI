@@ -5,6 +5,11 @@
 *.so
 *.dylib
 
+# Linux and android builds and binaries
+uvs
+*.tar.gz
+*.apk
+
 # Test binary, built with `go test -c`
 *.test
 
@@ -12,4 +17,4 @@
 *.out
 
 # Dependency directories (remove the comment below to include it)
-# vendor/
+vendor/
