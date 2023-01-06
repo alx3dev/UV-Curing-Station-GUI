@@ -7,7 +7,7 @@
 
 # Linux and android builds and binaries
 uvs
-*.tar.gz
+*.tar.xz
 *.apk
 
 # Test binary, built with `go test -c`
