@@ -51,12 +51,14 @@ func (uv *UV_Station) Start() {
 
 	if !(uv.APP.Driver().Device().IsMobile() && uv.APP.Driver().Device().IsBrowser()) {
 		os.Setenv("FYNE_SCALE", "1")
+
 		width *= 2
 		height *= 1.1
 	}
 
 	w.Resize(fyne.NewSize(width, height))
 	w.CenterOnScreen()
+	w.SetFixedSize(true)
 	w.SetMaster()
 	w.Show()
 
@@ -71,8 +73,8 @@ func Initialize(id string) *UV_Station {
 	a.Settings().SetTheme(&theme2.MyTheme{Theme: thm})
 
 	uv := &UV_Station{
-		WIN:    a.NewWindow(""),
 		APP:    a,
+		WIN:    a.NewWindow(""),
 		config: a.Preferences(),
 	}
 

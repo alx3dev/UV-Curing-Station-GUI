@@ -9,23 +9,22 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// Main screen contain all controls for UV station
+//
+// Many things will be changed here during development
 func mainScreen(uv *UV_Station) fyne.CanvasObject {
-	/*
-		fyne app & window with permanent
-		storage and default configuration
-	*/
+
+	// define our app, master window and translation
 	a := uv.APP
 	w := uv.WIN
 	T := uv.T
 
-	// load defaults
+	// load values from storage
 	timer := uv.config.IntWithFallback("TIMER", TIMER)
 	power := uv.config.IntWithFallback("POWER", POWER)
 	speed := uv.config.IntWithFallback("SPEED", SPEED)
 
-	/*
-		define binding and slide for each parameter
-	*/
+	// define binding and slide for each control
 	timerBind := binding.NewFloat()
 	timerBind.Set(float64(timer))
 
@@ -38,6 +37,10 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	timerSlide := widget.NewSliderWithData(0, float64(TIMER_MAX), timerBind)
 	powerSlide := widget.NewSliderWithData(0, float64(POWER_MAX), powerBind)
 	speedSlide := widget.NewSliderWithData(0, float64(SPEED_MAX), speedBind)
+
+	/*
+		Format Values output
+	*/
 
 	//format timer output
 	timerText := container.NewGridWithColumns(2,
@@ -87,10 +90,12 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 			theme.ContentAddIcon(),
 			func() { uv.increaseValue(speedSlide, speedBind) }))
 
+	//	Format UV Station control output
 	timerOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), timerText, timerSlide), buttons)
 	powerOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), powerText, powerSlide), pbuttons)
 	speedOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), speedText, speedSlide), sbuttons)
 
+	//	Control and sync slides/values
 	timerSlide.OnChanged = func(f float64) {
 		timerBind.Set(f)
 		uv.config.SetInt("TIMER", int(f))
@@ -110,59 +115,69 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	uv.powerBind = powerBind
 	uv.speedBind = speedBind
 
-	updateButton := widget.NewButtonWithIcon("", theme.ConfirmIcon(), func() {
-		//to-do Send command to ESP-32
-	})
+	/*
+		Define buttons for main screen
+	*/
+
+	// to-do Send START command to ESP-32
+	updateButton := widget.NewButtonWithIcon("", theme.ConfirmIcon(), func() {})
 	updateButton.Importance = widget.HighImportance
 
+	// load default values
 	defaultsButton := widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
 		uv.loadDefaults()
 	})
 
+	// to-do Send STOP command to ESP-32
 	quitButton := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
-		//to-do Send command to ESP-32
-		a.Quit()
+		a.Quit() // this blocks on Android
 	})
 
+	// only for development, app.quit blocks on android
 	var controlButtons *fyne.Container
-
 	if uv.APP.Driver().Device().IsMobile() || uv.APP.Driver().Device().IsBrowser() {
 		controlButtons = container.New(layout.NewGridLayout(2), updateButton, defaultsButton)
 	} else {
 		controlButtons = container.New(layout.NewGridLayout(3), updateButton, defaultsButton, quitButton)
 	}
 
+	// put everything together (control and buttons)
 	uvs_opts := container.NewVBox(timerOpts, powerOpts, speedOpts)
 	bottom_buttons := container.NewVBox(controlButtons)
 
 	screen := container.NewBorder(nil, bottom_buttons, nil, nil, uvs_opts)
 
+	// add some shortcuts for easier work on PC
 	w.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
 		switch key.Name {
 
 		case fyne.KeyRight:
-			uv.increaseValue(timerSlide, uv.timerBind)
+			uv.increaseValue(timerSlide, timerBind)
 
 		case fyne.KeyLeft:
-			uv.decreaseValue(timerSlide, uv.timerBind)
+			uv.decreaseValue(timerSlide, timerBind)
 
 		case fyne.KeyUp:
-			uv.increaseValue(powerSlide, uv.powerBind)
+			uv.increaseValue(powerSlide, powerBind)
 
 		case fyne.KeyDown:
-			uv.decreaseValue(powerSlide, uv.powerBind)
+			uv.decreaseValue(powerSlide, powerBind)
 
 		case fyne.KeyPageDown:
-			uv.decreaseValue(speedSlide, uv.speedBind)
+			uv.decreaseValue(speedSlide, speedBind)
 
 		case fyne.KeyPageUp:
-			uv.increaseValue(speedSlide, uv.speedBind)
+			uv.increaseValue(speedSlide, speedBind)
 
 		case fyne.KeySpace:
 			uv.loadDefaults()
 
-		case fyne.KeyReturn:
-			// to-do Send command to ESP32
+		case fyne.KeyReturn: // to-do Send command to ESP32
+			if w.FullScreen() {
+				w.SetFullScreen(false)
+			} else {
+				w.SetFullScreen(true)
+			}
 
 		case fyne.KeyEscape:
 			// to-do Minimize to taskbar?

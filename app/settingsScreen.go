@@ -9,6 +9,8 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+// Let user to choose theme and language
+// to-do ESP32 configuration
 func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	T := uv.T
 

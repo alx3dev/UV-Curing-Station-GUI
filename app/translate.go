@@ -2,7 +2,7 @@ package uvs
 
 func (uv *UV_Station) LoadTranslations() {
 	language :=
-		uv.APP.Preferences().StringWithFallback("LANGUAGE", "English")
+		uv.config.StringWithFallback("LANGUAGE", "English")
 
 	// so we don't need to translate everything,
 	// english string will be used if translation not found
@@ -12,7 +12,6 @@ func (uv *UV_Station) LoadTranslations() {
 }
 
 func (uv *UV_Station) SetLanguage(lang string) {
-	uv.APP.Preferences().SetString("LANGUAGE", lang)
+	uv.config.SetString("LANGUAGE", lang)
 	uv.T.ImplementTranslation(lang)
 }
-
