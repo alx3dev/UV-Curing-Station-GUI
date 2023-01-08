@@ -70,11 +70,9 @@ func (uv *UV_Station) parseLanguage() func(string) {
 		case T.EN:
 			uv.SetLanguage("English")
 			uv.config.SetString("LANGUAGE", "English")
-			uv.Notify("Please restart app for changes to take effect")
 		case T.SR:
 			uv.SetLanguage("Serbian")
 			uv.config.SetString("LANGUAGE", "Serbian")
-			uv.Notify("Рестартујте апликацију након промене језика")
 		}
 		uv.refreshTitles()
 	}
