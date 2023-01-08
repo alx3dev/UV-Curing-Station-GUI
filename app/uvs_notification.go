@@ -9,19 +9,19 @@ func (uv *UV_Station) Notify(message string) {
 }
 
 func (uv *UV_Station) NotifyOnNextStart(message string) {
-	msg := uv.APP.Preferences().StringWithFallback("ON_NEXT_START_MESSAGE", "")
+	msg := uv.config.StringWithFallback("ON_NEXT_START_MESSAGE", "")
 
 	if msg != "" {
 		msg += "\n"
 	}
 	msg += message
-	uv.APP.Preferences().SetString("ON_NEXT_START_TITLE", "UV Station")
-	uv.APP.Preferences().SetString("ON_NEXT_START_MESSAGE", msg)
+	uv.config.SetString("ON_NEXT_START_TITLE", "UV Station")
+	uv.config.SetString("ON_NEXT_START_MESSAGE", msg)
 }
 
 func (uv *UV_Station) CheckOnStartNotification() {
-	n := uv.APP.Preferences().StringWithFallback("ON_NEXT_START_TITLE", "")
-	msg := uv.APP.Preferences().StringWithFallback("ON_NEXT_START_MESSAGE", "")
+	n := uv.config.StringWithFallback("ON_NEXT_START_TITLE", "")
+	msg := uv.config.StringWithFallback("ON_NEXT_START_MESSAGE", "")
 
 	if n != "" {
 		uv.Notify(msg)
@@ -29,8 +29,7 @@ func (uv *UV_Station) CheckOnStartNotification() {
 	}
 }
 
-func (uvs *UV_Station) ClearNotifications() {
-	uvs.APP.Preferences().SetString("ON_NEXT_START_TITLE", "")
-	uvs.APP.Preferences().SetString("ON_NEXT_START_MESSAGE", "")
+func (uv *UV_Station) ClearNotifications() {
+	uv.config.SetString("ON_NEXT_START_TITLE", "")
+	uv.config.SetString("ON_NEXT_START_MESSAGE", "")
 }
-

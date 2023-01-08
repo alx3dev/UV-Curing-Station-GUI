@@ -62,11 +62,23 @@ func (uv *UV_Station) parseLanguage() func(string) {
 	return func(l string) {
 		switch l {
 		case T.EN:
+			uv.SetLanguage("English")
 			uv.config.SetString("LANGUAGE", "English")
 			uv.Notify("Please restart app for changes to take effect")
 		case T.SR:
+			uv.SetLanguage("Serbian")
 			uv.config.SetString("LANGUAGE", "Serbian")
 			uv.Notify("Рестартујте апликацију након промене језика")
 		}
+		uv.refreshTitles()
 	}
+}
+
+func (uv *UV_Station) refreshTitles() {
+	uv.sub.mainTab.Text = uv.T.Home
+	uv.sub.consoleTab.Text = uv.T.Console
+	uv.sub.settingsTab.Text = uv.T.Settings
+
+	uv.WIN.SetTitle(uv.T.Title)
+	uv.WIN.Content().Refresh()
 }

@@ -24,6 +24,7 @@ type UV_Station struct {
 	APP    fyne.App
 	T      uvs.Translation
 	config fyne.Preferences
+	sub    Subitems
 
 	timerBind binding.Float
 	powerBind binding.Float
@@ -37,6 +38,10 @@ func (uv *UV_Station) Start() {
 	mainTab := container.NewTabItem(T.Home, container.NewPadded(mainScreen(uv)))
 	consoleTab := container.NewTabItem(T.Console, container.NewPadded(consoleScreen(uv)))
 	settingsTab := container.NewTabItem(T.Settings, container.NewPadded(settingsScreen(uv)))
+
+	uv.sub.mainTab = mainTab
+	uv.sub.consoleTab = consoleTab
+	uv.sub.settingsTab = settingsTab
 
 	tabs := container.NewAppTabs(mainTab, consoleTab, settingsTab)
 
