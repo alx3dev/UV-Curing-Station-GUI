@@ -94,5 +94,4 @@ func (uv *UV_Station) refreshTitles() {
 	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
 
 	uv.WIN.SetTitle(uv.T.Title)
-	uv.WIN.Content().Refresh()
 }
