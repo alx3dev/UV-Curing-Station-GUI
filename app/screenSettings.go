@@ -79,6 +79,9 @@ func (uv *UV_Station) refreshTitles() {
 	uv.sub.consoleTab.Text = uv.T.Console
 	uv.sub.settingsTab.Text = uv.T.Settings
 
+	uv.sub.timerLabel.Set(uv.T.Timer)
+	uv.sub.powerLabel.Set(uv.T.Power)
+	uv.sub.speedLabel.Set(uv.T.Speed)
+
 	uv.WIN.SetTitle(uv.T.Title)
-	uv.WIN.Content().Refresh()
 }

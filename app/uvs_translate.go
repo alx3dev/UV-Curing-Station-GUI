@@ -2,6 +2,7 @@ package uvs
 
 import (
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 )
 
 func (uv *UV_Station) LoadTranslations() {
@@ -26,4 +27,7 @@ type Subitems struct {
 	mainTab     *container.TabItem
 	consoleTab  *container.TabItem
 	settingsTab *container.TabItem
+	timerLabel  binding.String
+	powerLabel  binding.String
+	speedLabel  binding.String
 }

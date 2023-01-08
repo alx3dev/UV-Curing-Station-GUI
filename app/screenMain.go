@@ -42,21 +42,31 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 		Format Values output
 	*/
 
+	// define bindings for automatic translate
+	uv.sub.timerLabel = binding.NewString()
+	uv.sub.timerLabel.Set(T.Timer)
+
+	uv.sub.powerLabel = binding.NewString()
+	uv.sub.powerLabel.Set(T.Power)
+
+	uv.sub.speedLabel = binding.NewString()
+	uv.sub.speedLabel.Set(T.Speed)
+
 	//format timer output
 	timerText := container.NewGridWithColumns(2,
-		widget.NewLabel(T.Timer),
+		widget.NewLabelWithData(uv.sub.timerLabel),
 		widget.NewLabelWithData(binding.FloatToStringWithFormat(
 			timerBind, "%0.0f m")))
 
 	// format led power output
 	powerText := container.NewGridWithColumns(2,
-		widget.NewLabel(T.Power),
+		widget.NewLabelWithData(uv.sub.powerLabel),
 		widget.NewLabelWithData(binding.FloatToStringWithFormat(
 			powerBind, "%0.0f %%")))
 
 	// format motor speed output
 	speedText := container.NewGridWithColumns(2,
-		widget.NewLabel(T.Speed),
+		widget.NewLabelWithData(uv.sub.speedLabel),
 		widget.NewLabelWithData(binding.FloatToStringWithFormat(
 			speedBind, "%0.0f %%")))
 
