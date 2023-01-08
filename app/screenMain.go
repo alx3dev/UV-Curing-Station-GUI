@@ -42,7 +42,7 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 		Format Values output
 	*/
 
-	// define bindings for automatic translate
+	// define label bindings for automatic translate
 	uv.sub.timerLabel = binding.NewString()
 	uv.sub.timerLabel.Set(T.Timer)
 

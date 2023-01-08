@@ -4,8 +4,8 @@ import (
 	"uvs/theme"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
 )
 
@@ -14,10 +14,16 @@ import (
 func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	T := uv.T
 
-	themeText := canvas.NewText(T.ChooseTheme, nil)
+	uv.sub.chooseThemeLabel = binding.NewString()
+	uv.sub.chooseThemeLabel.Set(T.ChooseTheme)
+
+	uv.sub.chooseLanguageLabel = binding.NewString()
+	uv.sub.chooseLanguageLabel.Set(T.ChooseLanguage)
+
+	themeText := widget.NewLabelWithData(uv.sub.chooseThemeLabel)
 	tdropdown := widget.NewSelect([]string{T.Light, T.Dark}, uv.parseTheme())
 
-	langText := canvas.NewText(T.ChooseLanguage, nil)
+	langText := widget.NewLabelWithData(uv.sub.chooseLanguageLabel)
 	ldropdown := widget.NewSelect([]string{T.EN, T.SR}, uv.parseLanguage())
 
 	t := uv.config.StringWithFallback("THEME", T.Light)
@@ -74,6 +80,7 @@ func (uv *UV_Station) parseLanguage() func(string) {
 	}
 }
 
+// change language without restart
 func (uv *UV_Station) refreshTitles() {
 	uv.sub.mainTab.Text = uv.T.Home
 	uv.sub.consoleTab.Text = uv.T.Console
@@ -83,5 +90,9 @@ func (uv *UV_Station) refreshTitles() {
 	uv.sub.powerLabel.Set(uv.T.Power)
 	uv.sub.speedLabel.Set(uv.T.Speed)
 
+	uv.sub.chooseThemeLabel.Set(uv.T.ChooseTheme)
+	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
+
 	uv.WIN.SetTitle(uv.T.Title)
+	uv.WIN.Content().Refresh()
 }

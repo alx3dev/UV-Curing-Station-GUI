@@ -27,7 +27,10 @@ type Subitems struct {
 	mainTab     *container.TabItem
 	consoleTab  *container.TabItem
 	settingsTab *container.TabItem
-	timerLabel  binding.String
-	powerLabel  binding.String
-	speedLabel  binding.String
+
+	timerLabel          binding.String
+	powerLabel          binding.String
+	speedLabel          binding.String
+	chooseThemeLabel    binding.String
+	chooseLanguageLabel binding.String
 }
