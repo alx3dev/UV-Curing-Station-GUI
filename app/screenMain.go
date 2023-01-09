@@ -14,91 +14,64 @@ import (
 // Many things will be changed here during development
 func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
-	// define our app, master window and translation
-	a := uv.APP
-	w := uv.WIN
-	T := uv.T
+	// load default config and define bindings
+	uv.InitializeBindings()
 
-	// load values from storage
-	timer := uv.config.IntWithFallback("TIMER", TIMER)
-	power := uv.config.IntWithFallback("POWER", POWER)
-	speed := uv.config.IntWithFallback("SPEED", SPEED)
-
-	// define binding and slide for each control
-	timerBind := binding.NewFloat()
-	timerBind.Set(float64(timer))
-
-	powerBind := binding.NewFloat()
-	powerBind.Set(float64(power))
-
-	speedBind := binding.NewFloat()
-	speedBind.Set(float64(speed))
-
-	timerSlide := widget.NewSliderWithData(0, float64(TIMER_MAX), timerBind)
-	powerSlide := widget.NewSliderWithData(0, float64(POWER_MAX), powerBind)
-	speedSlide := widget.NewSliderWithData(0, float64(SPEED_MAX), speedBind)
+	timerSlide := widget.NewSliderWithData(0, float64(TIMER_MAX), uv.timerBind)
+	powerSlide := widget.NewSliderWithData(0, float64(POWER_MAX), uv.powerBind)
+	speedSlide := widget.NewSliderWithData(0, float64(SPEED_MAX), uv.speedBind)
 
 	/*
 		Format Values output
 	*/
 
-	// define label bindings for automatic translate
-	uv.sub.timerLabel = binding.NewString()
-	uv.sub.timerLabel.Set(T.Timer)
-
-	uv.sub.powerLabel = binding.NewString()
-	uv.sub.powerLabel.Set(T.Power)
-
-	uv.sub.speedLabel = binding.NewString()
-	uv.sub.speedLabel.Set(T.Speed)
-
 	//format timer output
 	timerText := container.NewGridWithColumns(2,
 		widget.NewLabelWithData(uv.sub.timerLabel),
 		widget.NewLabelWithData(binding.FloatToStringWithFormat(
-			timerBind, "%0.0f m")))
+			uv.timerBind, "%0.0f m")))
 
 	// format led power output
 	powerText := container.NewGridWithColumns(2,
 		widget.NewLabelWithData(uv.sub.powerLabel),
 		widget.NewLabelWithData(binding.FloatToStringWithFormat(
-			powerBind, "%0.0f %%")))
+			uv.powerBind, "%0.0f %%")))
 
 	// format motor speed output
 	speedText := container.NewGridWithColumns(2,
 		widget.NewLabelWithData(uv.sub.speedLabel),
 		widget.NewLabelWithData(binding.FloatToStringWithFormat(
-			speedBind, "%0.0f %%")))
+			uv.speedBind, "%0.0f %%")))
 
 	// timer buttons (- +)
 	buttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() { uv.decreaseValue(timerSlide, timerBind) }),
+			func() { uv.decreaseValue(timerSlide, uv.timerBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() { uv.increaseValue(timerSlide, timerBind) }))
+			func() { uv.increaseValue(timerSlide, uv.timerBind) }))
 
 	// led power buttons (- +)
 	pbuttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() { uv.decreaseValue(powerSlide, powerBind) }),
+			func() { uv.decreaseValue(powerSlide, uv.powerBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() { uv.increaseValue(powerSlide, powerBind) }))
+			func() { uv.increaseValue(powerSlide, uv.powerBind) }))
 
 	// motor speed buttons (- +)
 	sbuttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
 			theme.ContentRemoveIcon(),
-			func() { uv.decreaseValue(speedSlide, speedBind) }),
+			func() { uv.decreaseValue(speedSlide, uv.speedBind) }),
 
 		widget.NewButtonWithIcon("",
 			theme.ContentAddIcon(),
-			func() { uv.increaseValue(speedSlide, speedBind) }))
+			func() { uv.increaseValue(speedSlide, uv.speedBind) }))
 
 	//	Format UV Station control output
 	timerOpts := container.NewAdaptiveGrid(2, container.New(layout.NewFormLayout(), timerText, timerSlide), buttons)
@@ -107,23 +80,19 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
 	//	Control and sync slides/values
 	timerSlide.OnChanged = func(f float64) {
-		timerBind.Set(f)
+		uv.timerBind.Set(f)
 		uv.config.SetInt("TIMER", int(f))
 	}
 
 	powerSlide.OnChanged = func(f float64) {
-		powerBind.Set(f)
+		uv.powerBind.Set(f)
 		uv.config.SetInt("POWER", int(f))
 	}
 
 	speedSlide.OnChanged = func(f float64) {
-		speedBind.Set(f)
+		uv.speedBind.Set(f)
 		uv.config.SetInt("SPEED", int(f))
 	}
-
-	uv.timerBind = timerBind
-	uv.powerBind = powerBind
-	uv.speedBind = speedBind
 
 	/*
 		Define buttons for main screen
@@ -140,7 +109,7 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
 	// to-do Send STOP command to ESP-32
 	quitButton := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
-		a.Quit() // this blocks on Android
+		uv.APP.Quit() // this blocks on Android
 	})
 
 	// only for development, app.quit blocks on android
@@ -158,35 +127,35 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	screen := container.NewBorder(nil, bottom_buttons, nil, nil, uvs_opts)
 
 	// add some shortcuts for easier work on PC
-	w.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
+	uv.WIN.Canvas().SetOnTypedKey(func(key *fyne.KeyEvent) {
 		switch key.Name {
 
 		case fyne.KeyRight:
-			uv.increaseValue(timerSlide, timerBind)
+			uv.increaseValue(timerSlide, uv.timerBind)
 
 		case fyne.KeyLeft:
-			uv.decreaseValue(timerSlide, timerBind)
+			uv.decreaseValue(timerSlide, uv.timerBind)
 
 		case fyne.KeyUp:
-			uv.increaseValue(powerSlide, powerBind)
+			uv.increaseValue(powerSlide, uv.powerBind)
 
 		case fyne.KeyDown:
-			uv.decreaseValue(powerSlide, powerBind)
+			uv.decreaseValue(powerSlide, uv.powerBind)
 
 		case fyne.KeyPageDown:
-			uv.decreaseValue(speedSlide, speedBind)
+			uv.decreaseValue(speedSlide, uv.speedBind)
 
 		case fyne.KeyPageUp:
-			uv.increaseValue(speedSlide, speedBind)
+			uv.increaseValue(speedSlide, uv.speedBind)
 
 		case fyne.KeySpace:
 			uv.loadDefaults()
 
 		case fyne.KeyReturn: // to-do Send command to ESP32
-			if w.FullScreen() {
-				w.SetFullScreen(false)
+			if uv.WIN.FullScreen() {
+				uv.WIN.SetFullScreen(false)
 			} else {
-				w.SetFullScreen(true)
+				uv.WIN.SetFullScreen(true)
 			}
 
 		case fyne.KeyEscape:
@@ -196,29 +165,4 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	screen.Refresh()
 
 	return screen
-}
-
-/*
-Helper methods for main screen
-*/
-
-// allow user to change default values
-func (uv *UV_Station) loadDefaults() {
-	uv.timerBind.Set(float64(uv.config.IntWithFallback("TIMER_DEFAULT", TIMER)))
-	uv.powerBind.Set(float64(uv.config.IntWithFallback("POWER_DEFAULT", POWER)))
-	uv.speedBind.Set(float64(uv.config.IntWithFallback("SPEED_DEFAULT", SPEED)))
-}
-
-// increase slider bind value by 1
-func (uv *UV_Station) increaseValue(slide *widget.Slider, bind binding.Float) {
-	if slide.Value < slide.Max {
-		bind.Set(slide.Value + 1)
-	}
-}
-
-// decrease slider bind value by 1
-func (uv *UV_Station) decreaseValue(slide *widget.Slider, bind binding.Float) {
-	if slide.Value > slide.Min {
-		bind.Set(slide.Value - 1)
-	}
 }

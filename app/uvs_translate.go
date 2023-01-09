@@ -5,7 +5,7 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 )
 
-func (uv *UV_Station) LoadTranslations() {
+func (uv *UV_Station) InitializeTranslations() {
 	language :=
 		uv.config.StringWithFallback("LANGUAGE", "English")
 

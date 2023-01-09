@@ -83,7 +83,7 @@ func Initialize(id string) *UV_Station {
 		config: a.Preferences(),
 	}
 
-	uv.LoadTranslations()
+	uv.InitializeTranslations()
 	uv.WIN.SetTitle(uv.T.Title)
 
 	return uv
