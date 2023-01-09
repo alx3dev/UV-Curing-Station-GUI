@@ -32,40 +32,34 @@ type UV_Station struct {
 }
 
 func (uv *UV_Station) Start() {
-	w := uv.WIN
-	T := uv.T
 
-	mainTab := container.NewTabItem(T.Home, container.NewPadded(mainScreen(uv)))
-	consoleTab := container.NewTabItem(T.Console, container.NewPadded(consoleScreen(uv)))
-	settingsTab := container.NewTabItem(T.Settings, container.NewPadded(settingsScreen(uv)))
+	uv.sub.mainTab = container.NewTabItem(uv.T.Home, container.NewPadded(mainScreen(uv)))
+	uv.sub.consoleTab = container.NewTabItem(uv.T.Console, container.NewPadded(consoleScreen(uv)))
+	uv.sub.settingsTab = container.NewTabItem(uv.T.Settings, container.NewPadded(settingsScreen(uv)))
 
-	uv.sub.mainTab = mainTab
-	uv.sub.consoleTab = consoleTab
-	uv.sub.settingsTab = settingsTab
-
-	tabs := container.NewAppTabs(mainTab, consoleTab, settingsTab)
+	tabs := container.NewAppTabs(uv.sub.mainTab, uv.sub.consoleTab, uv.sub.settingsTab)
 
 	tabs.OnSelected = func(t *container.TabItem) {
 		t.Content.Refresh()
 	}
 
-	w.SetContent(tabs)
+	uv.WIN.SetContent(tabs)
 
-	width := w.Canvas().Size().Width
-	height := w.Canvas().Size().Height
+	width := uv.WIN.Canvas().Size().Width
+	height := uv.WIN.Canvas().Size().Height
 
 	if !(uv.APP.Driver().Device().IsMobile() && uv.APP.Driver().Device().IsBrowser()) {
 		os.Setenv("FYNE_SCALE", "1")
 
 		width *= 2
-		height *= 1.1
+		height *= 1.2
 	}
 
-	w.Resize(fyne.NewSize(width, height))
-	w.CenterOnScreen()
-	w.SetFixedSize(true)
-	w.SetMaster()
-	w.Show()
+	uv.WIN.Resize(fyne.NewSize(width, height))
+	uv.WIN.CenterOnScreen()
+	uv.WIN.SetFixedSize(true)
+	uv.WIN.SetMaster()
+	uv.WIN.Show()
 
 	uv.APP.Run()
 }
