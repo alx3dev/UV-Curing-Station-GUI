@@ -43,6 +43,10 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 		widget.NewLabelWithData(binding.FloatToStringWithFormat(
 			uv.speedBind, "%0.0f %%")))
 
+	/*
+		Add value buttons (- +)
+	*/
+
 	// timer buttons (- +)
 	buttons := container.NewGridWithColumns(2,
 		widget.NewButtonWithIcon("",
@@ -114,7 +118,7 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
 	// only for development, app.quit blocks on android
 	var controlButtons *fyne.Container
-	if uv.APP.Driver().Device().IsMobile() || uv.APP.Driver().Device().IsBrowser() {
+	if uv.isMobile() {
 		controlButtons = container.New(layout.NewGridLayout(2), updateButton, defaultsButton)
 	} else {
 		controlButtons = container.New(layout.NewGridLayout(3), updateButton, defaultsButton, quitButton)

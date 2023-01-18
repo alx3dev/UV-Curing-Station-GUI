@@ -2,6 +2,7 @@ package uvs
 
 import (
 	"os"
+
 	theme2 "uvs/theme"
 	uvs "uvs/translation"
 
@@ -20,11 +21,17 @@ var POWER_MAX int = 100
 var SPEED_MAX int = 100
 
 type UV_Station struct {
-	WIN    fyne.Window
-	APP    fyne.App
-	T      uvs.Translation
-	config fyne.Preferences
-	sub    Subitems
+	WIN     fyne.Window
+	SET_WIN fyne.Window
+	APP     fyne.App
+	T       uvs.Translation
+	config  fyne.Preferences
+	sub     Subitems
+
+	IP   string
+	PORT string
+
+	system uint8
 
 	timerBind binding.Float
 	powerBind binding.Float
@@ -48,9 +55,8 @@ func (uv *UV_Station) Start() {
 	width := uv.WIN.Canvas().Size().Width
 	height := uv.WIN.Canvas().Size().Height
 
-	if !(uv.APP.Driver().Device().IsMobile() && uv.APP.Driver().Device().IsBrowser()) {
+	if !uv.isMobile() {
 		os.Setenv("FYNE_SCALE", "1")
-
 		width *= 2
 		height *= 1.2
 	}
@@ -75,6 +81,12 @@ func Initialize(id string) *UV_Station {
 		APP:    a,
 		WIN:    a.NewWindow(""),
 		config: a.Preferences(),
+		system: getOS(),
+	}
+
+	if uv.system == 0 {
+		println("Operating System is not supported.")
+		uv.APP.Quit()
 	}
 
 	uv.InitializeTranslations()

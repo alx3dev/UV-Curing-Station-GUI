@@ -38,7 +38,7 @@ func (t *Translation) ImplementTranslation(l string) {
 		t.EN = "English"
 		t.SR = "Serbian"
 		t.Send = "Send"
-		t.IP = "IP"
+		t.IP = "IP Address"
 		t.Port = "Port"
 
 	case "Serbian":
