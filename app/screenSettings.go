@@ -11,75 +11,94 @@ import (
 // Let user to choose theme and language
 // to-do ESP32 configuration
 func settingsScreen(uv *UV_Station) fyne.CanvasObject {
-	T := uv.T
 
+	// define widgets for theme and language settings
 	themeText := widget.NewLabelWithData(uv.sub.chooseThemeLabel)
-	tdropdown := widget.NewSelect([]string{T.Light, T.Dark}, uv.parseTheme())
+	tdropdown := widget.NewSelect([]string{uv.T.Light, uv.T.Dark}, uv.parseTheme())
 
 	langText := widget.NewLabelWithData(uv.sub.chooseLanguageLabel)
-	ldropdown := widget.NewSelect([]string{T.EN, T.SR}, uv.parseLanguage())
+	ldropdown := widget.NewSelect([]string{uv.T.EN, uv.T.SR}, uv.parseLanguage())
 
-	t := uv.config.StringWithFallback("THEME", T.Light)
+	// define theme dropdown menu
+	t := uv.config.StringWithFallback("THEME", uv.T.Light)
 	switch t {
 	case "Светла", "Light":
-		tdropdown.PlaceHolder = T.Light
+		tdropdown.PlaceHolder = uv.T.Light
 	case "Тамна", "Dark":
-		tdropdown.PlaceHolder = T.Dark
+		tdropdown.PlaceHolder = uv.T.Dark
 	}
 	tdropdown.Refresh()
 
+	// define language dropdown menu
 	l := uv.config.StringWithFallback("LANGUAGE", "English")
 	switch l {
 	case "English":
-		ldropdown.PlaceHolder = T.EN
+		ldropdown.PlaceHolder = uv.T.EN
 	case "Serbian":
-		ldropdown.PlaceHolder = T.SR
+		ldropdown.PlaceHolder = uv.T.SR
 	}
 	ldropdown.Refresh()
 
+	// define entry settings for IP and PORT
 	setIPentry := widget.NewEntry()
 	setPortEntry := widget.NewEntry()
 
-	uvSettings := widget.NewButton("Set IP and Port", func() {
-		setIPtext := widget.NewLabel(uv.T.IP)
-		setPortText := widget.NewLabel(uv.T.Port)
+	ippName := uv.IP + " : " + uv.PORT
+
+	if uv.IP == "" || uv.PORT == "" {
+		ippName = "Set IP and Port"
+	}
+
+	// button to open IP and PORT settings window
+	ip_port_settings := widget.NewButton(ippName, func() {
 
 		setIPentry.Text = uv.IP
 		setPortEntry.Text = uv.PORT
 
+		setIPtext := widget.NewLabel(uv.T.IP)
+		setPortText := widget.NewLabel(uv.T.Port)
+
 		uv.SET_WIN = uv.APP.NewWindow(uv.T.Settings)
 
+		// save IP settings and close window
 		saveButton := widget.NewButton("Save", func() {
 			uv.IP = setIPentry.Text
-			uv.config.SetString("IP", uv.IP)
-
 			uv.PORT = setPortEntry.Text
+
+			uv.config.SetString("IP", uv.IP)
 			uv.config.SetString("PORT", uv.PORT)
+
+			ippName = uv.IP + " : " + uv.PORT
 			uv.SET_WIN.Close()
 		})
 
+		// close settings window
 		cancelButton := widget.NewButton("Cancel", func() {
 			uv.SET_WIN.Close()
 		})
 
+		// put IP and PORT settings in a container
 		ss := container.NewVBox(setIPtext, setIPentry)
 		ss.Add(container.NewVBox(setPortText, setPortEntry))
 		ss.Add(container.NewAdaptiveGrid(2, saveButton, cancelButton))
 
 		uv.SET_WIN.SetContent(ss)
 
-		width := uv.SET_WIN.Canvas().Size().Width * 3
-		height := uv.SET_WIN.Canvas().Size().Height
-
-		uv.SET_WIN.Resize(fyne.NewSize(width, height))
+		// strech window for PC users
+		if !uv.isMobile() {
+			uv.SET_WIN.Resize(fyne.NewSize(
+				uv.SET_WIN.Canvas().Size().Width*3,
+				uv.SET_WIN.Canvas().Size().Height,
+			))
+		}
 		uv.SET_WIN.Show()
 	})
 
-	settings := container.NewVBox(uvSettings)
-
+	// put all settings together on a screen
 	txt := container.NewAdaptiveGrid(2, themeText, langText)
 	ctrl := container.NewAdaptiveGrid(2, tdropdown, ldropdown)
 
+	settings := container.NewVBox(ip_port_settings)
 	settings.Add(container.NewVBox(txt, ctrl))
 
 	return settings

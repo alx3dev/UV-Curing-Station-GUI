@@ -21,15 +21,15 @@ var POWER_MAX int = 100
 var SPEED_MAX int = 100
 
 type UV_Station struct {
-	WIN     fyne.Window
-	SET_WIN fyne.Window
+	WIN     fyne.Window // main window
+	SET_WIN fyne.Window // settings window (for ip and port)
 	APP     fyne.App
-	T       uvs.Translation
-	config  fyne.Preferences
-	sub     Subitems
+	T       uvs.Translation // translateable params
+	config  fyne.Preferences  // shortuct to fyne preferences
+	sub     Subitems  // items that need refresh on language change
 
-	IP   string
-	PORT string
+	IP   string // esp32 access-point IP address
+	PORT string // esp32 server port
 
 	system uint8
 
