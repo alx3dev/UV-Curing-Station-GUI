@@ -36,6 +36,7 @@ func Initialize(id string) *UV_Station {
 	thm := a.Preferences().StringWithFallback("THEME", "Тамна")
 
 	a.Settings().SetTheme(&theme2.MyTheme{Theme: thm})
+	a.SetIcon(theme2.Ico)
 
 	uv := &UV_Station{
 		APP:    a,
@@ -44,13 +45,7 @@ func Initialize(id string) *UV_Station {
 		system: getOS(),
 	}
 
-	if uv.system == 0 {
-		println("Operating System is not supported.")
-		uv.APP.Quit()
-	}
-
-	uv.InitializeTranslations()
-	uv.WIN.SetTitle(uv.T.Title)
+	uv.onInitialize()
 
 	return uv
 }
@@ -84,4 +79,20 @@ func (uv *UV_Station) Start() {
 	uv.WIN.Show()
 
 	uv.APP.Run()
+}
+
+// TO-DO: add "how-to" window on first start
+func (uv *UV_Station) onInitialize() {
+	if uv.system == 0 {
+		println("Operating System is not supported.")
+		uv.APP.Quit()
+	}
+	uv.InitializeTranslations()
+	uv.WIN.SetTitle(uv.T.Title)
+
+	first := uv.config.StringWithFallback("FIRST_INIT", "")
+	if first == "" {
+		//go uv.Notify("Welcome Message")
+		uv.config.SetString("FIRST_INIT", "false")
+	}
 }

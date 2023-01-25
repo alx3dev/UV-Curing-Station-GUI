@@ -16,6 +16,14 @@ var my_font = &fyne.StaticResource{
 	StaticContent: font,
 }
 
+//go:embed Icon.ico
+var icon []byte
+
+var Ico = &fyne.StaticResource{
+	StaticName:    "Icon.ico",
+	StaticContent: icon,
+}
+
 type MyTheme struct {
 	Theme string
 }

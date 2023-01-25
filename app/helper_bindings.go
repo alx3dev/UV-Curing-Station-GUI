@@ -16,7 +16,7 @@ var TIMER_MAX int = 30
 var POWER_MAX int = 100
 var SPEED_MAX int = 100
 
-// Keep pointers for automatic refresh
+// Keep items for automatic refresh
 // after language change
 type Subitems struct {
 	mainTab     *container.TabItem
@@ -68,6 +68,7 @@ func (uv *UV_Station) InitializeBindings() {
 	uv.sub.chooseLanguageLabel = binding.NewString()
 	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
 
+	// define IP & Port config label binding for automatic translate
 	uv.sub.configLabel = binding.NewString()
 	uv.sub.configLabel.Set(uv.T.Configuration)
 }
