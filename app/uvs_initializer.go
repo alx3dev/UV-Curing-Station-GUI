@@ -12,21 +12,13 @@ import (
 	"fyne.io/fyne/v2/data/binding"
 )
 
-var TIMER int = 5
-var POWER int = 80
-var SPEED int = 30
-
-var TIMER_MAX int = 30
-var POWER_MAX int = 100
-var SPEED_MAX int = 100
-
 type UV_Station struct {
 	WIN     fyne.Window // main window
 	SET_WIN fyne.Window // settings window (for ip and port)
 	APP     fyne.App
-	T       uvs.Translation // translateable params
-	config  fyne.Preferences  // shortuct to fyne preferences
-	sub     Subitems  // items that need refresh on language change
+	T       uvs.Translation  // translateable params
+	config  fyne.Preferences // shortuct to fyne preferences
+	sub     Subitems         // items that need refresh on language change
 
 	IP   string // esp32 access-point IP address
 	PORT string // esp32 server port
@@ -38,13 +30,37 @@ type UV_Station struct {
 	speedBind binding.Float
 }
 
+func Initialize(id string) *UV_Station {
+	a := app.NewWithID(id)
+
+	thm := a.Preferences().StringWithFallback("THEME", "Тамна")
+
+	a.Settings().SetTheme(&theme2.MyTheme{Theme: thm})
+
+	uv := &UV_Station{
+		APP:    a,
+		WIN:    a.NewWindow(""),
+		config: a.Preferences(),
+		system: getOS(),
+	}
+
+	if uv.system == 0 {
+		println("Operating System is not supported.")
+		uv.APP.Quit()
+	}
+
+	uv.InitializeTranslations()
+	uv.WIN.SetTitle(uv.T.Title)
+
+	return uv
+}
+
 func (uv *UV_Station) Start() {
 
 	uv.sub.mainTab = container.NewTabItem(uv.T.Home, container.NewPadded(mainScreen(uv)))
-	uv.sub.consoleTab = container.NewTabItem(uv.T.Console, container.NewPadded(consoleScreen(uv)))
 	uv.sub.settingsTab = container.NewTabItem(uv.T.Settings, container.NewPadded(settingsScreen(uv)))
 
-	tabs := container.NewAppTabs(uv.sub.mainTab, uv.sub.consoleTab, uv.sub.settingsTab)
+	tabs := container.NewAppTabs(uv.sub.mainTab, uv.sub.settingsTab)
 
 	tabs.OnSelected = func(t *container.TabItem) {
 		t.Content.Refresh()
@@ -68,29 +84,4 @@ func (uv *UV_Station) Start() {
 	uv.WIN.Show()
 
 	uv.APP.Run()
-}
-
-func Initialize(id string) *UV_Station {
-	a := app.NewWithID(id)
-
-	thm := a.Preferences().StringWithFallback("THEME", "Light")
-
-	a.Settings().SetTheme(&theme2.MyTheme{Theme: thm})
-
-	uv := &UV_Station{
-		APP:    a,
-		WIN:    a.NewWindow(""),
-		config: a.Preferences(),
-		system: getOS(),
-	}
-
-	if uv.system == 0 {
-		println("Operating System is not supported.")
-		uv.APP.Quit()
-	}
-
-	uv.InitializeTranslations()
-	uv.WIN.SetTitle(uv.T.Title)
-
-	return uv
 }

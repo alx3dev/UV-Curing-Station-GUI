@@ -17,6 +17,7 @@ type Translation struct {
 	Send           string
 	IP             string
 	Port           string
+	Configuration  string
 }
 
 func (t *Translation) ImplementTranslation(l string) {
@@ -40,6 +41,7 @@ func (t *Translation) ImplementTranslation(l string) {
 		t.Send = "Send"
 		t.IP = "IP Address"
 		t.Port = "Port"
+		t.Configuration = "IP and Port configuration"
 
 	case "Serbian":
 
@@ -59,6 +61,7 @@ func (t *Translation) ImplementTranslation(l string) {
 		t.Send = "Пошаљи"
 		t.IP = "Адреса"
 		t.Port = "Порт"
+		t.Configuration = "Адреса и Порт"
 
 	}
 }

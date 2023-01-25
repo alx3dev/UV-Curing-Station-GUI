@@ -8,12 +8,22 @@ import (
 	"fyne.io/fyne/v2/widget"
 )
 
+var TIMER int = 5
+var POWER int = 80
+var SPEED int = 30
+
+var TIMER_MAX int = 30
+var POWER_MAX int = 100
+var SPEED_MAX int = 100
+
 // Keep pointers for automatic refresh
 // after language change
 type Subitems struct {
 	mainTab     *container.TabItem
-	consoleTab  *container.TabItem
 	settingsTab *container.TabItem
+
+	configButton *widget.Button
+	configLabel  binding.String
 
 	timerLabel          binding.String
 	powerLabel          binding.String
@@ -28,7 +38,7 @@ func (uv *UV_Station) InitializeBindings() {
 	power := uv.config.IntWithFallback("POWER", POWER)
 	speed := uv.config.IntWithFallback("SPEED", SPEED)
 
-	uv.IP = uv.config.StringWithFallback("IP", "")
+	uv.IP = uv.config.StringWithFallback("IP", "127.0.0.1")
 	uv.PORT = uv.config.StringWithFallback("PORT", "80")
 
 	// define bindings for control values
@@ -57,6 +67,9 @@ func (uv *UV_Station) InitializeBindings() {
 
 	uv.sub.chooseLanguageLabel = binding.NewString()
 	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
+
+	uv.sub.configLabel = binding.NewString()
+	uv.sub.configLabel.Set(uv.T.Configuration)
 }
 
 /*

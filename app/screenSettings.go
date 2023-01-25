@@ -9,14 +9,14 @@ import (
 )
 
 // Let user to choose theme and language
-// to-do ESP32 configuration
+// Configure Esp32 IP and Port
 func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 
 	// define widgets for theme and language settings
-	themeText := widget.NewLabelWithData(uv.sub.chooseThemeLabel)
+	themeLabel := widget.NewLabelWithData(uv.sub.chooseThemeLabel)
 	tdropdown := widget.NewSelect([]string{uv.T.Light, uv.T.Dark}, uv.parseTheme())
 
-	langText := widget.NewLabelWithData(uv.sub.chooseLanguageLabel)
+	langLabel := widget.NewLabelWithData(uv.sub.chooseLanguageLabel)
 	ldropdown := widget.NewSelect([]string{uv.T.EN, uv.T.SR}, uv.parseLanguage())
 
 	// define theme dropdown menu
@@ -43,14 +43,11 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	setIPentry := widget.NewEntry()
 	setPortEntry := widget.NewEntry()
 
-	ippName := uv.IP + " : " + uv.PORT
-
-	if uv.IP == "" || uv.PORT == "" {
-		ippName = "Set IP and Port"
-	}
+	ippsLabel := widget.NewLabelWithData(uv.sub.configLabel)
+	ibutTitle := uv.IP + " : " + uv.PORT
 
 	// button to open IP and PORT settings window
-	ip_port_settings := widget.NewButton(ippName, func() {
+	ip_port_settings := widget.NewButton(ibutTitle, func() {
 
 		setIPentry.Text = uv.IP
 		setPortEntry.Text = uv.PORT
@@ -68,7 +65,8 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 			uv.config.SetString("IP", uv.IP)
 			uv.config.SetString("PORT", uv.PORT)
 
-			ippName = uv.IP + " : " + uv.PORT
+			uv.sub.configButton.Text = uv.IP + ":" + uv.PORT
+			uv.sub.configButton.Refresh()
 			uv.SET_WIN.Close()
 		})
 
@@ -78,11 +76,11 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 		})
 
 		// put IP and PORT settings in a container
-		ss := container.NewVBox(setIPtext, setIPentry)
-		ss.Add(container.NewVBox(setPortText, setPortEntry))
-		ss.Add(container.NewAdaptiveGrid(2, saveButton, cancelButton))
+		ipps := container.NewVBox(setIPtext, setIPentry)
+		ipps.Add(container.NewVBox(setPortText, setPortEntry))
+		ipps.Add(container.NewAdaptiveGrid(2, saveButton, cancelButton))
 
-		uv.SET_WIN.SetContent(ss)
+		uv.SET_WIN.SetContent(ipps)
 
 		// strech window for PC users
 		if !uv.isMobile() {
@@ -94,12 +92,18 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 		uv.SET_WIN.Show()
 	})
 
-	// put all settings together on a screen
-	txt := container.NewAdaptiveGrid(2, themeText, langText)
-	ctrl := container.NewAdaptiveGrid(2, tdropdown, ldropdown)
+	uv.sub.configButton = ip_port_settings
 
-	settings := container.NewVBox(ip_port_settings)
-	settings.Add(container.NewVBox(txt, ctrl))
+	ipp := container.NewGridWithRows(2, ippsLabel, ip_port_settings)
+
+	// theme and language settings
+	thm := container.NewGridWithRows(2, themeLabel, tdropdown)
+	lng := container.NewGridWithRows(2, langLabel, ldropdown)
+
+	ui_settings := container.NewAdaptiveGrid(2, thm, lng)
+
+	// put all settings together on a screen
+	settings := container.NewVBox(ui_settings, ipp)
 
 	return settings
 }
@@ -135,7 +139,6 @@ func (uv *UV_Station) parseLanguage() func(string) {
 // change language without restart
 func (uv *UV_Station) refreshTitles() {
 	uv.sub.mainTab.Text = uv.T.Home
-	uv.sub.consoleTab.Text = uv.T.Console
 	uv.sub.settingsTab.Text = uv.T.Settings
 
 	uv.sub.timerLabel.Set(uv.T.Timer)
@@ -144,6 +147,8 @@ func (uv *UV_Station) refreshTitles() {
 
 	uv.sub.chooseThemeLabel.Set(uv.T.ChooseTheme)
 	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
+
+	uv.sub.configLabel.Set(uv.T.Configuration)
 
 	uv.WIN.SetTitle(uv.T.Title)
 }

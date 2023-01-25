@@ -10,8 +10,7 @@ import (
 )
 
 // Main screen contain all controls for UV station
-//
-// Many things will be changed here during development
+// .
 func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
 	// load default config and define bindings
