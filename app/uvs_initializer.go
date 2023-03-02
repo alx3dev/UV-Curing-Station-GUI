@@ -3,6 +3,7 @@ package uvs
 import (
 	"os"
 
+	request "uvs/requests"
 	theme2 "uvs/theme"
 	uvs "uvs/translation"
 
@@ -13,15 +14,15 @@ import (
 )
 
 type UV_Station struct {
-	WIN     fyne.Window // main window
-	SET_WIN fyne.Window // settings window (for ip and port)
-	APP     fyne.App
-	T       uvs.Translation  // translateable params
-	config  fyne.Preferences // shortuct to fyne preferences
-	sub     Subitems         // items that need refresh on language change
+	WIN    fyne.Window // main window
+	APP    fyne.App
+	T      uvs.Translation  // translateable params
+	config fyne.Preferences // shortuct to fyne preferences
+	sub    Subitems         // items that need refresh on language change
 
-	IP   string // esp32 access-point IP address
-	PORT string // esp32 server port
+	dial *request.Request // internet engine
+	IP   string           // esp32 access-point IP address
+	PORT string           // esp32 server port
 
 	system uint8
 
@@ -43,6 +44,7 @@ func Initialize(id string) *UV_Station {
 		WIN:    a.NewWindow(""),
 		config: a.Preferences(),
 		system: getOS(),
+		dial:   request.Initialize("http", ""),
 	}
 
 	uv.onInitialize()

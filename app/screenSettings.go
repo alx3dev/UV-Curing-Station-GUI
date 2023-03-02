@@ -14,30 +14,28 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 
 	// define widgets for theme and language settings
 	themeLabel := widget.NewLabelWithData(uv.sub.chooseThemeLabel)
-	tdropdown := widget.NewSelect([]string{uv.T.Light, uv.T.Dark}, uv.parseTheme())
+	themeSelect := widget.NewRadioGroup([]string{uv.T.Light, uv.T.Dark}, uv.parseTheme())
+	themeSelect.Required = true
+
+	if uv.config.StringWithFallback("THEME", "Light") == "Light" {
+		themeSelect.Selected = uv.T.Light
+	} else {
+		themeSelect.Selected = uv.T.Dark
+	}
 
 	langLabel := widget.NewLabelWithData(uv.sub.chooseLanguageLabel)
-	ldropdown := widget.NewSelect([]string{uv.T.EN, uv.T.SR}, uv.parseLanguage())
+	langSelect := widget.NewRadioGroup([]string{uv.T.EN, uv.T.SR}, uv.parseLanguage())
+	langSelect.Required = true
 
-	// define theme dropdown menu
-	t := uv.config.StringWithFallback("THEME", uv.T.Light)
-	switch t {
-	case "Светла", "Light":
-		tdropdown.PlaceHolder = uv.T.Light
-	case "Тамна", "Dark":
-		tdropdown.PlaceHolder = uv.T.Dark
-	}
-	tdropdown.Refresh()
-
-	// define language dropdown menu
-	l := uv.config.StringWithFallback("LANGUAGE", "English")
-	switch l {
-	case "English":
-		ldropdown.PlaceHolder = uv.T.EN
+	switch uv.config.StringWithFallback("LANGUAGE", "English") {
 	case "Serbian":
-		ldropdown.PlaceHolder = uv.T.SR
+		langSelect.Selected = uv.T.SR
+	default:
+		langSelect.Selected = uv.T.EN
 	}
-	ldropdown.Refresh()
+
+	uv.sub.themeSelect = themeSelect
+	uv.sub.langSelect = langSelect
 
 	// define entry settings for IP and PORT
 	setIPentry := widget.NewEntry()
@@ -55,24 +53,28 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 		setIPtext := widget.NewLabel(uv.T.IP)
 		setPortText := widget.NewLabel(uv.T.Port)
 
-		uv.SET_WIN = uv.APP.NewWindow(uv.T.Settings)
+		setWin := uv.APP.NewWindow(uv.T.Settings)
 
 		// save IP settings and close window
 		saveButton := widget.NewButton("Save", func() {
 			uv.IP = setIPentry.Text
 			uv.PORT = setPortEntry.Text
 
+			uv.dial.SetUri(uv.IP + ":" + uv.PORT)
+
 			uv.config.SetString("IP", uv.IP)
 			uv.config.SetString("PORT", uv.PORT)
 
-			uv.sub.configButton.Text = uv.IP + ":" + uv.PORT
-			uv.sub.configButton.Refresh()
-			uv.SET_WIN.Close()
+			go func() {
+				uv.sub.configButton.Text = uv.IP + ":" + uv.PORT
+				uv.sub.configButton.Refresh()
+			}()
+			setWin.Close()
 		})
 
 		// close settings window
 		cancelButton := widget.NewButton("Cancel", func() {
-			uv.SET_WIN.Close()
+			setWin.Close()
 		})
 
 		// put IP and PORT settings in a container
@@ -80,16 +82,16 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 		ipps.Add(container.NewVBox(setPortText, setPortEntry))
 		ipps.Add(container.NewAdaptiveGrid(2, saveButton, cancelButton))
 
-		uv.SET_WIN.SetContent(ipps)
+		setWin.SetContent(ipps)
 
 		// strech window for PC users
 		if !uv.isMobile() {
-			uv.SET_WIN.Resize(fyne.NewSize(
-				uv.SET_WIN.Canvas().Size().Width*3,
-				uv.SET_WIN.Canvas().Size().Height,
+			setWin.Resize(fyne.NewSize(
+				setWin.Canvas().Size().Width*3,
+				setWin.Canvas().Size().Height,
 			))
 		}
-		uv.SET_WIN.Show()
+		setWin.Show()
 	})
 
 	uv.sub.configButton = ip_port_settings
@@ -97,42 +99,44 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	ipp := container.NewGridWithRows(2, ippsLabel, ip_port_settings)
 
 	// theme and language settings
-	thm := container.NewGridWithRows(2, themeLabel, tdropdown)
-	lng := container.NewGridWithRows(2, langLabel, ldropdown)
+	thm := container.NewVBox(themeLabel, themeSelect)
+	lng := container.NewVBox(langLabel, langSelect)
 
-	ui_settings := container.NewAdaptiveGrid(2, thm, lng)
+	ui_settings := container.NewVBox(lng, thm)
 
 	// put all settings together on a screen
-	settings := container.NewVBox(ui_settings, ipp)
+	settings := container.NewVBox(ipp, ui_settings)
 
 	return settings
 }
 
 func (uv *UV_Station) parseTheme() func(string) {
 	return func(t string) {
-		switch t {
-		case "Светла", "Light":
-			uv.config.SetString("THEME", "Светла")
-			uv.APP.Settings().SetTheme(&theme.MyTheme{Theme: "Светла"})
-		case "Тамна", "Dark":
-			uv.config.SetString("THEME", "Тамна")
-			uv.APP.Settings().SetTheme(&theme.MyTheme{Theme: "Тамна"})
+		if t == uv.T.Light {
+			uv.config.SetString("THEME", "Light")
+			uv.sub.themeSelect.SetSelected(uv.T.Light)
+			uv.APP.Settings().SetTheme(&theme.MyTheme{Theme: "Light"})
+		} else {
+			uv.config.SetString("THEME", "Dark")
+			uv.sub.themeSelect.SetSelected(uv.T.Dark)
+			uv.APP.Settings().SetTheme(&theme.MyTheme{Theme: "Dark"})
 		}
 	}
 }
 
 func (uv *UV_Station) parseLanguage() func(string) {
-	T := uv.T
 	return func(l string) {
-		switch l {
-		case T.EN:
-			uv.SetLanguage("English")
-			uv.config.SetString("LANGUAGE", "English")
-		case T.SR:
-			uv.SetLanguage("Serbian")
-			uv.config.SetString("LANGUAGE", "Serbian")
-		}
-		uv.refreshTitles()
+		go func() {
+			switch l {
+			case uv.T.EN:
+				uv.SetLanguage("English")
+				uv.sub.langSelect.SetSelected(uv.T.EN)
+			case uv.T.SR:
+				uv.SetLanguage("Serbian")
+				uv.sub.langSelect.SetSelected(uv.T.SR)
+			}
+			uv.refreshTitles()
+		}()
 	}
 }
 
@@ -146,7 +150,16 @@ func (uv *UV_Station) refreshTitles() {
 	uv.sub.speedLabel.Set(uv.T.Speed)
 
 	uv.sub.chooseThemeLabel.Set(uv.T.ChooseTheme)
+	uv.sub.themeSelect.Options = []string{uv.T.Light, uv.T.Dark}
+	if uv.config.StringWithFallback("THEME", "Light") == "Light" {
+		uv.sub.themeSelect.SetSelected(uv.T.Light)
+	} else {
+		uv.sub.themeSelect.SetSelected(uv.T.Dark)
+	}
+
 	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
+	uv.sub.langSelect.Options = []string{uv.T.EN, uv.T.SR}
+	uv.sub.langSelect.Refresh()
 
 	uv.sub.configLabel.Set(uv.T.Configuration)
 

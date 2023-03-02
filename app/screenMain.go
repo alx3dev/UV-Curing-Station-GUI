@@ -1,7 +1,6 @@
 package uvs
 
 import (
-	"context"
 	"strconv"
 
 	"fyne.io/fyne/v2"
@@ -10,7 +9,6 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
-	"github.com/carlmjohnson/requests"
 )
 
 // Main screen contain all controls for UV station
@@ -107,11 +105,11 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 
 	// to-do Send START command to ESP-32
 	updateButton := widget.NewButtonWithIcon("", theme.ConfirmIcon(), func() {
-		t := strconv.Itoa(int(timerSlide.Value))
-		p := strconv.Itoa(int(powerSlide.Value))
-		s := strconv.Itoa(int(speedSlide.Value))
+		uv.dial.Params["timer"] = strconv.Itoa(int(timerSlide.Value))
+		uv.dial.Params["power"] = strconv.Itoa(int(powerSlide.Value))
+		uv.dial.Params["speed"] = strconv.Itoa(int(speedSlide.Value))
 
-		uv.Request("uvs", t, p, s)
+		uv.dial.GetRequest("uvs", uv.dial.Params)
 	})
 	updateButton.Importance = widget.HighImportance
 
@@ -178,23 +176,4 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	screen.Refresh()
 
 	return screen
-}
-
-func (uv *UV_Station) Request(route, timer, power, speed string) {
-	var s string
-	ctx := context.Background()
-
-	err := requests.
-		URL("http://uvstation/"+route).
-		Host(uv.IP+":"+uv.PORT).
-		Param("timer", timer).
-		Param("power", power).
-		Param("speed", speed).
-		CheckStatus(200).
-		ToString(&s).
-		Fetch(ctx)
-
-	if err != nil {
-		println(err.Error())
-	}
 }

@@ -30,6 +30,9 @@ type Subitems struct {
 	speedLabel          binding.String
 	chooseThemeLabel    binding.String
 	chooseLanguageLabel binding.String
+
+	themeSelect *widget.RadioGroup
+	langSelect  *widget.RadioGroup
 }
 
 func (uv *UV_Station) InitializeBindings() {
@@ -40,6 +43,8 @@ func (uv *UV_Station) InitializeBindings() {
 
 	uv.IP = uv.config.StringWithFallback("IP", "127.0.0.1")
 	uv.PORT = uv.config.StringWithFallback("PORT", "80")
+
+	uv.dial.SetUri(uv.IP + ":" + uv.PORT)
 
 	// define bindings for control values
 	uv.timerBind = binding.NewFloat()
