@@ -31,6 +31,10 @@ func (req *Request) SetUri(uri string) {
 	req.Uri = uri
 }
 
+func (req *Request) SetProtocol(prot string) {
+	req.protocol = prot
+}
+
 func (req *Request) Get(route string) (string, error) {
 	return req.GetRequest(route, req.emptyParams)
 }
@@ -38,7 +42,7 @@ func (req *Request) Get(route string) (string, error) {
 func (req *Request) GetRequest(route string, params map[string]string) (string, error) {
 	var resp string
 
-	domain := req.Uri
+	domain := "//" + req.Uri
 
 	if len(route) > 0 {
 		domain += "/" + route
@@ -51,7 +55,6 @@ func (req *Request) GetRequest(route string, params map[string]string) (string, 
 	if len(params) > 0 {
 		for key, value := range params {
 			r = r.Param(key, value)
-
 		}
 	}
 
