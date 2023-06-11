@@ -104,32 +104,25 @@ func mainScreen(uv *UV_Station) fyne.CanvasObject {
 	*/
 
 	// to-do Send START command to ESP-32
-	updateButton := widget.NewButtonWithIcon("", theme.ConfirmIcon(), func() {
+	startButton := widget.NewButtonWithIcon("", theme.ConfirmIcon(), func() {
 		uv.dial.Params["timer"] = strconv.Itoa(int(timerSlide.Value))
 		uv.dial.Params["power"] = strconv.Itoa(int(powerSlide.Value))
 		uv.dial.Params["speed"] = strconv.Itoa(int(speedSlide.Value))
 
 		uv.dial.GetRequest("uvs", uv.dial.Params)
 	})
-	updateButton.Importance = widget.HighImportance
+	startButton.Importance = widget.HighImportance
+
+	stopButton := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
+		uv.dial.Get("stop")
+	})
 
 	// load default values
 	defaultsButton := widget.NewButtonWithIcon("", theme.ViewRefreshIcon(), func() {
 		uv.loadDefaults()
 	})
 
-	// to-do Send STOP command to ESP-32
-	quitButton := widget.NewButtonWithIcon("", theme.CancelIcon(), func() {
-		uv.APP.Quit() // this blocks on Android
-	})
-
-	// only for development, app.quit blocks on android
-	var controlButtons *fyne.Container
-	if uv.isMobile() {
-		controlButtons = container.New(layout.NewGridLayout(2), updateButton, defaultsButton)
-	} else {
-		controlButtons = container.New(layout.NewGridLayout(3), updateButton, defaultsButton, quitButton)
-	}
+	controlButtons := container.NewGridWithColumns(3, startButton, defaultsButton, stopButton)
 
 	// put everything together (control and buttons)
 	uvs_opts := container.NewVBox(timerOpts, powerOpts, speedOpts)

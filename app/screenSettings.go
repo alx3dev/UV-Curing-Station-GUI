@@ -12,6 +12,16 @@ import (
 // Configure Esp32 IP and Port
 func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 
+	//define hostname entry settings
+	hostLabel := widget.NewLabelWithData(uv.sub.setHostLabel)
+	hostEntry := widget.NewEntry()
+	hostEntry.Text = uv.HOSTNAME
+
+	hostEntry.OnChanged = func(s string) {
+		uv.config.SetString("HOSTNAME", s)
+		uv.dial.SetUri(s)
+	}
+
 	// define widgets for theme and language settings
 	themeLabel := widget.NewLabelWithData(uv.sub.chooseThemeLabel)
 	themeSelect := widget.NewRadioGroup([]string{uv.T.Light, uv.T.Dark}, uv.parseTheme())
@@ -37,66 +47,7 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	uv.sub.themeSelect = themeSelect
 	uv.sub.langSelect = langSelect
 
-	// define entry settings for IP and PORT
-	setIPentry := widget.NewEntry()
-	setPortEntry := widget.NewEntry()
-
-	ippsLabel := widget.NewLabelWithData(uv.sub.configLabel)
-	ibutTitle := uv.IP + " : " + uv.PORT
-
-	// button to open IP and PORT settings window
-	ip_port_settings := widget.NewButton(ibutTitle, func() {
-
-		setIPentry.Text = uv.IP
-		setPortEntry.Text = uv.PORT
-
-		setIPtext := widget.NewLabel(uv.T.IP)
-		setPortText := widget.NewLabel(uv.T.Port)
-
-		setWin := uv.APP.NewWindow(uv.T.Settings)
-
-		// save IP settings and close window
-		saveButton := widget.NewButton("Save", func() {
-			uv.IP = setIPentry.Text
-			uv.PORT = setPortEntry.Text
-
-			uv.dial.SetUri(uv.IP + ":" + uv.PORT)
-
-			uv.config.SetString("IP", uv.IP)
-			uv.config.SetString("PORT", uv.PORT)
-
-			go func() {
-				uv.sub.configButton.Text = uv.IP + ":" + uv.PORT
-				uv.sub.configButton.Refresh()
-			}()
-			setWin.Close()
-		})
-
-		// close settings window
-		cancelButton := widget.NewButton("Cancel", func() {
-			setWin.Close()
-		})
-
-		// put IP and PORT settings in a container
-		ipps := container.NewVBox(setIPtext, setIPentry)
-		ipps.Add(container.NewVBox(setPortText, setPortEntry))
-		ipps.Add(container.NewAdaptiveGrid(2, saveButton, cancelButton))
-
-		setWin.SetContent(ipps)
-
-		// strech window for PC users
-		if !uv.isMobile() {
-			setWin.Resize(fyne.NewSize(
-				setWin.Canvas().Size().Width*3,
-				setWin.Canvas().Size().Height,
-			))
-		}
-		setWin.Show()
-	})
-
-	uv.sub.configButton = ip_port_settings
-
-	ipp := container.NewGridWithRows(2, ippsLabel, ip_port_settings)
+	host_settings := container.NewVBox(hostLabel, hostEntry)
 
 	// theme and language settings
 	thm := container.NewVBox(themeLabel, themeSelect)
@@ -105,7 +56,7 @@ func settingsScreen(uv *UV_Station) fyne.CanvasObject {
 	ui_settings := container.NewVBox(lng, thm)
 
 	// put all settings together on a screen
-	settings := container.NewVBox(ipp, ui_settings)
+	settings := container.NewVBox(host_settings, ui_settings)
 
 	return settings
 }
@@ -149,6 +100,8 @@ func (uv *UV_Station) refreshTitles() {
 	uv.sub.powerLabel.Set(uv.T.Power)
 	uv.sub.speedLabel.Set(uv.T.Speed)
 
+	uv.sub.setHostLabel.Set(uv.T.Hostname)
+
 	uv.sub.chooseThemeLabel.Set(uv.T.ChooseTheme)
 	uv.sub.themeSelect.Options = []string{uv.T.Light, uv.T.Dark}
 	if uv.config.StringWithFallback("THEME", "Light") == "Light" {
@@ -160,8 +113,6 @@ func (uv *UV_Station) refreshTitles() {
 	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
 	uv.sub.langSelect.Options = []string{uv.T.EN, uv.T.SR}
 	uv.sub.langSelect.Refresh()
-
-	uv.sub.configLabel.Set(uv.T.Configuration)
 
 	uv.WIN.SetTitle(uv.T.Title)
 }

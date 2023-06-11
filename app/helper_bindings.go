@@ -22,12 +22,11 @@ type Subitems struct {
 	mainTab     *container.TabItem
 	settingsTab *container.TabItem
 
-	configButton *widget.Button
-	configLabel  binding.String
+	timerLabel binding.String
+	powerLabel binding.String
+	speedLabel binding.String
 
-	timerLabel          binding.String
-	powerLabel          binding.String
-	speedLabel          binding.String
+	setHostLabel        binding.String
 	chooseThemeLabel    binding.String
 	chooseLanguageLabel binding.String
 
@@ -41,10 +40,12 @@ func (uv *UV_Station) InitializeBindings() {
 	power := uv.config.IntWithFallback("POWER", POWER)
 	speed := uv.config.IntWithFallback("SPEED", SPEED)
 
-	uv.IP = uv.config.StringWithFallback("IP", "127.0.0.1")
-	uv.PORT = uv.config.StringWithFallback("PORT", "80")
+	// for those who are not lazy to setup local dns
+	uv.HOSTNAME = uv.config.StringWithFallback("HOSTNAME", "")
 
-	uv.dial.SetUri(uv.IP + ":" + uv.PORT)
+	if len(uv.HOSTNAME) > 0 {
+		uv.dial.SetUri(uv.HOSTNAME)
+	}
 
 	// define bindings for control values
 	uv.timerBind = binding.NewFloat()
@@ -66,16 +67,15 @@ func (uv *UV_Station) InitializeBindings() {
 	uv.sub.speedLabel = binding.NewString()
 	uv.sub.speedLabel.Set(uv.T.Speed)
 
-	// define theme and language label bindings for automatic translate
+	// define host, theme and language label bindings for automatic translate
+	uv.sub.setHostLabel = binding.NewString()
+	uv.sub.setHostLabel.Set(uv.T.Hostname)
+
 	uv.sub.chooseThemeLabel = binding.NewString()
 	uv.sub.chooseThemeLabel.Set(uv.T.ChooseTheme)
 
 	uv.sub.chooseLanguageLabel = binding.NewString()
 	uv.sub.chooseLanguageLabel.Set(uv.T.ChooseLanguage)
-
-	// define IP & Port config label binding for automatic translate
-	uv.sub.configLabel = binding.NewString()
-	uv.sub.configLabel.Set(uv.T.Configuration)
 }
 
 /*

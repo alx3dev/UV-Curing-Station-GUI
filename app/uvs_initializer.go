@@ -20,9 +20,8 @@ type UV_Station struct {
 	config fyne.Preferences // shortuct to fyne preferences
 	sub    Subitems         // items that need refresh on language change
 
-	dial *request.Request // internet engine
-	IP   string           // esp32 access-point IP address
-	PORT string           // esp32 server port
+	dial     *request.Request // internet engine
+	HOSTNAME string
 
 	system uint8
 
