@@ -1,7 +1,7 @@
 # A WORK-IN-PROGRESS
 
 # Wireless-UV-Station
-GUI for Wireless control of UV curing station driven by ESP-8266 / ESP-32
+GUI for Wireless control of [UV curing station](https://github.com/alx3dev/UV-Curing-Station) driven by ESP-8266 / ESP-32
 
 ## Goals
  - Dead-simple and fast GUI for WiFi control of UV curing station for resin 3D prints
